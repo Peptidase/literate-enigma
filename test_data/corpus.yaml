@@ -1,0 +1,178 @@
+# corpus.yaml — public test corpus for the hardware documentation assistant
+#
+# Every URL below was located via search on 23 Aug 2026 but NOT downloaded, so
+# treat them as unverified until your fetcher has pulled them once. Vendor URLs
+# rot; that is a normal condition for this corpus and your fetcher should report
+# a dead link clearly rather than failing silently.
+#
+# WHY A MANIFEST RATHER THAN COMMITTED PDFs
+#   - Sidesteps redistribution terms, which vary by vendor and are not uniform
+#     even across "open hardware"
+#   - Keeps the repo small
+#   - The hash check detects a vendor silently republishing a revised document,
+#     which in this domain is a feature, not repo hygiene
+#
+# HASHES
+#   Left null deliberately. A hash you have not verified is theatre. Your fetcher
+#   should record sha256 on first successful fetch and verify on every run after.
+#   A changed hash is a signal to look, not an error to suppress.
+#
+# THE SURVEY FIELDS
+#   pages / pages_with_text_layer are null until measured. Filling them in IS the
+#   corpus survey — the check that decides whether the routing design holds. Have
+#   the fetcher populate them and commit the result.
+
+version: 1
+
+defaults:
+  user_agent: "hardware-docs-corpus/1.0"
+  timeout_seconds: 60
+
+documents:
+
+  # ---------------------------------------------------------------------------
+  # SCHEMATICS — vector drawings, reference designators, no useful reading order
+  # The hard case. Text may extract as an unordered soup of labels.
+  # ---------------------------------------------------------------------------
+
+  - id: arduino-uno-r3-schematic
+    url: https://www.arduino.cc/en/uploads/Main/Arduino_Uno_Rev3-schematic.pdf
+    category: schematic
+    vendor: Arduino
+    licence: CC-BY-SA (Arduino open hardware)
+    sha256: null
+    pages: null
+    pages_with_text_layer: null
+    exercises:
+      - reference designators as extractable strings (U1, R3, C7, J2)
+      - text with absolute positioning and meaningless extraction order
+      - topology that does not survive linearisation
+    notes: >
+      The single most important document here. If your identifier extraction
+      works on this, it will work on most schematics. If it returns an
+      unordered soup, that tells you the OCR/VLM path is mandatory rather
+      than optional.
+
+  # ---------------------------------------------------------------------------
+  # DATASHEETS — dense tables, pinouts, electrical characteristics
+  # Structured, high value, and where most exact-lookup answers live.
+  # ---------------------------------------------------------------------------
+
+  - id: arduino-uno-r3-datasheet
+    url: https://docs.arduino.cc/resources/datasheets/A000066-datasheet.pdf
+    category: datasheet
+    vendor: Arduino
+    licence: CC-BY-SA (Arduino open hardware)
+    sha256: null
+    pages: null
+    pages_with_text_layer: null
+    exercises:
+      - pinout tables
+      - board-level specification prose
+      - pairs with arduino-uno-r3-schematic — same board, two levels of detail
+    notes: >
+      Cross-document pair. A question answerable from either, or needing both,
+      is the cheapest multi-source test case you can build.
+
+  - id: ftdi-ft232r-datasheet
+    url: https://ftdichip.com/wp-content/uploads/2020/08/DS_FT232R.pdf
+    category: datasheet
+    vendor: FTDI
+    licence: free to download; redistribution terms unclear — do not commit
+    sha256: null
+    pages: null
+    pages_with_text_layer: null
+    exercises:
+      - a proper silicon datasheet — dense electrical tables, timing diagrams
+      - part number as the primary retrieval key (FT232RL, FT232RQ variants)
+      - package/pinout diagrams that are images, not text
+    notes: >
+      Standalone. Do NOT assume it connects to the Uno R3 — that board uses an
+      ATmega16U2 for USB. Earlier Arduinos used the FT232RL. Worth knowing
+      because "which board uses this chip" is exactly the kind of question a
+      user will ask and your corpus must not answer wrongly.
+
+  # ---------------------------------------------------------------------------
+  # GUIDES — text and photographs, with embedded schematics and pinout tables
+  # Your "documents with pictures" case, and the easiest wins for retrieval.
+  # ---------------------------------------------------------------------------
+
+  - id: adafruit-feather-overview
+    url: https://cdn-learn.adafruit.com/downloads/pdf/adafruit-feather.pdf
+    category: guide
+    vendor: Adafruit
+    licence: CC-BY-SA (Adafruit Learning System)
+    sha256: null
+    pages: null
+    pages_with_text_layer: null
+    exercises:
+      - prose that embeds well — the case vector search is good at
+      - the overview document that gives context for the specific ones below
+    notes: >
+      The family overview. Useful because questions about "the Feather form
+      factor" should retrieve this, while questions about a specific board
+      should not. A good negative test for retrieval precision.
+
+  - id: adafruit-feather-32u4-basic-proto
+    url: https://cdn-learn.adafruit.com/downloads/pdf/adafruit-feather-32u4-basic-proto.pdf
+    category: guide
+    vendor: Adafruit
+    licence: CC-BY-SA (Adafruit Learning System)
+    sha256: null
+    pages: null
+    pages_with_text_layer: null
+    exercises:
+      - photographs of a real board — the closest analogue to a user-submitted image
+      - silkscreen text visible in photos, for the OCR-from-photo path
+      - pinout tables mixed with prose
+      - an embedded schematic within a mostly-text document
+
+  - id: adafruit-feather-32u4-adalogger
+    url: https://cdn-learn.adafruit.com/downloads/pdf/adafruit-feather-32u4-adalogger.pdf
+    category: guide
+    vendor: Adafruit
+    licence: CC-BY-SA (Adafruit Learning System)
+    sha256: null
+    pages: null
+    pages_with_text_layer: null
+    exercises:
+      - near-duplicate content against basic-proto — same MCU, different board
+    notes: >
+      Deliberately similar to the one above. This is the retrieval trap: a
+      question about one board must not return the other. If your chunks lose
+      which document they came from, you will not notice this failure.
+
+  - id: adafruit-feather-32u4-lora
+    url: https://cdn-learn.adafruit.com/downloads/pdf/adafruit-feather-32u4-radio-with-lora-radio-module.pdf
+    category: guide
+    vendor: Adafruit
+    licence: CC-BY-SA (Adafruit Learning System)
+    sha256: null
+    pages: null
+    pages_with_text_layer: null
+    exercises:
+      - a third variant sharing the ATmega32u4
+      - radio module specifics that exist in no other document here
+    notes: >
+      Completes the family. "Which of these boards has a radio" needs one
+      document; "which share the same MCU" needs three. Two different retrieval
+      shapes from the same corpus.
+
+# -----------------------------------------------------------------------------
+# WORTH ADDING, DELIBERATELY NOT LISTED
+#
+# No URL given for these because I have not verified one, and a fabricated URL
+# in a manifest is worse than a gap.
+#
+#   - ATmega328P / ATmega32u4 datasheets (Microchip). These would complete the
+#     chain: guide -> schematic -> silicon datasheet. Highest-value addition.
+#   - A BeagleBone System Reference Manual. Long, structured, tables plus
+#     diagrams — closest to a real engineering document in bulk.
+#   - Something SCANNED with no text layer. Your routing has nothing to catch
+#     without one. An old service manual is the usual source.
+#
+# That last gap matters most. Every document above probably has a clean text
+# layer, so a survey across this corpus alone will tell you the OCR path is
+# unnecessary — and that conclusion would be an artefact of the sample, not the
+# truth about your real corpus.
+# -----------------------------------------------------------------------------
